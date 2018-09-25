@@ -10,10 +10,30 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
+  # if movies_path gets a :sort_accordance => 'title' parameter, sort according to title.
+  # if movies_path gets a :sort_accordance => 'date' parameter, sort according to release_date.
+  # else just show the table as it is.
+  
   def index
-    @movies = Movie.all
+    sort_accordance = params[:sort_accordance] || session[:sort_accordance]
+    # @title_html_class and @date_html_class are passed to view as <th>'s class element in index.html.haml
+    # initialize as empty array.
+    # empty array means no hilite in css.
+    # only the <th> whose class is 'hilite' will be highlighted.
+    @title_html_class = '' 
+    @date_html_class = ''
+    if sort_accordance == 'title'
+      @movies = Movie.all.order('title')
+      @title_html_class = 'hilite'
+    elsif sort_accordance == 'date'
+      @movies = Movie.all.order('release_date')
+      @date_html_class = 'hilite'
+    else
+      @movies = Movie.all
+    end
   end
-
+  
+  
   def new
     # default: render 'new' template
   end
