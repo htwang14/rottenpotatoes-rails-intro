@@ -15,22 +15,54 @@ class MoviesController < ApplicationController
   # else just show the table as it is.
   
   def index
-    sort_accordance = params[:sort_accordance] || session[:sort_accordance]
-    # @title_html_class and @date_html_class are passed to view as <th>'s class element in index.html.haml
-    # initialize as empty array.
-    # empty array means no hilite in css.
-    # only the <th> whose class is 'hilite' will be highlighted.
-    @title_html_class = '' 
-    @date_html_class = ''
-    if sort_accordance == 'title'
-      @movies = Movie.all.order('title')
-      @title_html_class = 'hilite'
-    elsif sort_accordance == 'date'
-      @movies = Movie.all.order('release_date')
-      @date_html_class = 'hilite'
-    else
-      @movies = Movie.all
+    # view give model 'params[:param_id]'
+    # model give view @instance_variables
+    
+    # Get @all_ratings:
+    @all_ratings = [] # initialize as empty list.
+    movies_list = Movie.all # get all movies
+    movies_list.each do |movie|
+      rating = movie.rating # for each movie, get its rating.
+      if !@all_ratings.include? rating # if we see a new rating, add it to the list.
+        @all_ratings += [rating]
+      end
     end
+    # Get @all_ratings finished
+    
+    
+    if params[:ratings].nil?
+      # Sorting part:
+      sort_accordance = params[:sort_accordance] || session[:sort_accordance]
+      # @title_html_class and @date_html_class are passed to view as <th>'s class element in index.html.haml
+      # initialize as empty array.
+      # empty array means no hilite in css.
+      # only the <th> whose class is 'hilite' will be highlighted.
+      @title_html_class = '' 
+      @date_html_class = ''
+      if sort_accordance == 'title'
+        @movies = Movie.all.order('title')
+        @title_html_class = 'hilite'
+      elsif sort_accordance == 'date'
+        @movies = Movie.all.order('release_date')
+        @date_html_class = 'hilite'
+      else
+        @movies = Movie.all
+      end
+      # Sorting finish
+      
+      # initialize @selected_ratings as @all_ratings.
+      # The first time the user visits the page, all checkboxes should be checked by default (so the user will see all movies).
+      @selected_ratings = @all_ratings
+      
+    else
+      # Selecting part:
+      # @selected_ratings = params[:ratings].keys
+      @selected_ratings = params[:ratings]
+      @movies = Movie.where({rating: @selected_ratings})
+      # #where will also accept a hash condition, in which the keys are fields and the values are values to be searched for.
+      #Selection finished
+    end
+    
   end
   
   
