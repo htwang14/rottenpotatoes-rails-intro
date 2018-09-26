@@ -10,10 +10,6 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-  # if movies_path gets a :sort_accordance => 'title' parameter, sort according to title.
-  # if movies_path gets a :sort_accordance => 'date' parameter, sort according to release_date.
-  # else just show the table as it is.
-  
   def index
     # Get @all_ratings:
     @all_ratings = [] # initialize as empty list.
@@ -75,6 +71,7 @@ class MoviesController < ApplicationController
     @movies = @movies.where({rating: @selected_ratings})
     #Selection finished. Get sorted and selected movie list in @movies
     
+    session.clear
     
   end
   
