@@ -6,10 +6,7 @@
   Include:
   - @all_ratings.each.each do |rating|
     = rating
-    // = check_box_tag "ratings[#{rating}]", @selected_ratings.include?(rating), id: "ratings_#{rating}"
-    -# the [#{}] in the naming of the checkbox will give you params[:ratings] as a hash in your controller action.
     = check_box_tag "ratings[]", rating, @selected_ratings.include?(rating), id: "ratings_#{rating}"
-    // = check_box_tag "ratings[]", rating, @all_ratings, id: "ratings_#{rating}"
     -# the [] in the naming of the checkbox will give you params[:ratings] as an array in your controller action.
     -# mark every rating which is included in @selected_ratings as checked.
   = submit_tag 'Refresh', id: 'ratings_submit'

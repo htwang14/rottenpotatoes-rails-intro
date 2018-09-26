@@ -15,13 +15,6 @@ class MoviesController < ApplicationController
   # else just show the table as it is.
   
   def index
-    # view give model 'params[:param_id]'
-    # model give view @instance_variables
-    
-    # in this example:
-    # view gives model params[:sort_accordance] (a string) and params[:ratings] (a list of strings)
-    # model sets @all_ratings, @selected_ratings, @movies, @title_html_class and @date_html_class for view to use.
-    
     # Get @all_ratings:
     @all_ratings = [] # initialize as empty list.
     movies_list = Movie.all # get all movies
@@ -32,39 +25,19 @@ class MoviesController < ApplicationController
       end
     end
     # Get @all_ratings finished
-    
-    # At the very beginning of the session:
-    # if flash[:ratings].nil?
-    #   # initialize @selected_ratings as @all_ratings at the start of the session.
-    #   # The first time the user visits the page, all checkboxes should be checked by default (so the user will see all movies).
-    #   @selected_ratings = @all_ratings
-    # end
-    
-    # Sorting part:
+
+    # if one of params[:sort_accordance] or params[:ratings] is missing, do redirection (to keep RESTful)
     if params[:sort_accordance].nil?
-      sort_accordance = session[:sort_accordance]
+      if session[:sort_accordance].nil?
+        sort_accordance = 'none' # When first called movies#index method, don't need to sort anything.
+      else
+        sort_accordance = session[:sort_accordance]
+      end
     else
       sort_accordance = params[:sort_accordance]
       session[:sort_accordance] = params[:sort_accordance]
     end
-    # @title_html_class and @date_html_class are passed to view as <th>'s class element in index.html.haml
-    # initialize as empty array.
-    # empty array means no hilite in css.
-    # only the <th> whose class is 'hilite' will be highlighted.
-    @title_html_class = '' 
-    @date_html_class = ''
-    if sort_accordance == 'title'
-      @movies = Movie.all.order('title')
-      @title_html_class = 'hilite'
-    elsif sort_accordance == 'date'
-      @movies = Movie.all.order('release_date')
-      @date_html_class = 'hilite'
-    else
-      @movies = Movie.all
-    end
-    # Sorting finish. Get sorted movie list in @movies
     
-    # Selecting part:
     if params[:ratings].nil?
       if session[:ratings].nil?
         @selected_ratings = @all_ratings # At the very beginning of the session.
@@ -75,9 +48,33 @@ class MoviesController < ApplicationController
       @selected_ratings = params[:ratings]
       session[:ratings] = params[:ratings]
     end
+    
+    if params[:sort_accordance].nil? or params[:ratings].nil?
+      redirect_to movies_path({:sort_accordance => sort_accordance, :ratings =>@selected_ratings})
+    end
+    # Redirection finished
+    
+    # Sorting part:
+    @title_html_class = '' 
+    @date_html_class = ''
+    if sort_accordance == 'title'
+      @movies = Movie.all.order('title')
+      @title_html_class = 'hilite'
+    elsif sort_accordance == 'date'
+      @movies = Movie.all.order('release_date')
+      @date_html_class = 'hilite'
+    elsif sort_accordance == 'none'
+      @movies = Movie.all
+    else
+      # @movies = Movie.all # should have thrown error here
+    end
+    # Sorting finish. Get sorted movie list in @movies
+    
+    # Selecting part:
+    @selected_ratings = params[:ratings]
     @movies = @movies.where({rating: @selected_ratings})
-    # #where will also accept a hash condition, in which the keys are fields and the values are values to be searched for.
     #Selection finished. Get sorted and selected movie list in @movies
+    
     
   end
   
