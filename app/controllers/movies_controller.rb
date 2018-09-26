@@ -71,7 +71,7 @@ class MoviesController < ApplicationController
     @movies = @movies.where({rating: @selected_ratings})
     #Selection finished. Get sorted and selected movie list in @movies
     
-    session.clear
+    # session.clear
     
   end
   
